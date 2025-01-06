@@ -20,17 +20,22 @@ const ChatApp = () => {
 
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       const signer = provider.getSigner();
-      const walletAddress = await signer.getAddress();
+      // const walletAddress = await signer.getAddress();
 
       setLoading(true);
+      const env = {env:"prod"};
 
+      const userin = await pushUtil.inituser(signer,env)
+      console.log("User initialized:", userin);
       // Step 1: Fetch user data and decrypt the private key
-      const user = await pushUtil.fetchUserData(`eip155:${walletAddress}`, signer);
+      // const user = await pushUtil.fetchUserData(`eip155:${walletAddress}`, signer);
 
       // Step 2: Fetch chats using the decrypted PGP private key
-      const chats = await pushUtil.fetchChats(`eip155:${walletAddress}`, user.pgpPrivateKey);
+      // const chats = await pushUtil.fetchChats(`eip155:${walletAddress}`, user.pgpPrivateKey);
 
-      setUserData({ user, chats });
+      const chats = await pushUtil.fetchChats(userin);
+
+      setUserData({ userin, chats });
       setIsConnected(true);
       toast.success("Wallet connected and data fetched!");
     } catch (error) {
