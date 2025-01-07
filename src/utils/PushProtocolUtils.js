@@ -1,4 +1,4 @@
-import { chat, user, CONSTANTS } from "@pushprotocol/restapi";
+import { chat, user, CONSTANTS ,PushAPI } from "@pushprotocol/restapi";
 import { ethers } from "ethers";
 
 class PushProtocolUtil {
@@ -6,6 +6,11 @@ class PushProtocolUtil {
     console.log("Constructor called");
     this.env = CONSTANTS?.ENV?.PROD || "prod";
   }
+
+  async inituser(signer,env) {
+    const user  = await PushAPI.initialize(signer,env);
+    return user;
+  };
 
   async fetchUserData(walletAddress, signer) {
     console.log("Fetching user data for:", walletAddress);
@@ -46,25 +51,30 @@ class PushProtocolUtil {
     console.log("Decryption complete:", decrypted);
     return new TextDecoder().decode(decrypted);
   }
-
-  async fetchChats(walletAddress, pgpPrivateKey) {
-    console.log("Fetching chats for:", walletAddress);
-
-    const chats = await chat.chats({
-      account: walletAddress,
-      pgpPrivateKey,
-      env: this.env,
-    });
-
-    return chats.map((chat) => ({
-      id: chat.id,
-      from: chat.fromDID,
-      to: chat.toDID,
-      lastMessage: chat.latestMessage
-        ? chat.latestMessage.messageContent
-        : "No messages yet",
-    }));
+  async fetchChats(user) {
+    const chats = await user.chat.list('CHATS')
+    return chats;
   }
+
+
+  // async fetchChats(walletAddress, pgpPrivateKey) {
+  //   console.log("Fetching chats for:", walletAddress);
+
+  //   const chats = await chat.chats({
+  //     account: walletAddress,
+  //     pgpPrivateKey,
+  //     env: this.env,
+  //   });
+
+  //   return chats.map((chat) => ({
+  //     id: chat.id,
+  //     from: chat.fromDID,
+  //     to: chat.toDID,
+  //     lastMessage: chat.latestMessage
+  //       ? chat.latestMessage.messageContent
+  //       : "No messages yet",
+  //   }));
+  // }
 }
 
 export default PushProtocolUtil;
